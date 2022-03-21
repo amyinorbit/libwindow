@@ -194,7 +194,7 @@ static void handle_key(XPLMWindowID id, char key, XPLMKeyFlags flags, char vkey,
     if(lose) return;
     if(!(flags & xplm_DownFlag)) return;
     window_t *window = refcon;
-    if(window->conf.key) window->conf.key(window, (int)vkey, window->refcon);
+    if(window->conf.key) window->conf.key(window, (int)vkey, key, window->refcon);
 }
 
 static XPLMCursorStatus default_cursor(XPLMWindowID id, int x, int y, void *refcon) {
@@ -268,8 +268,9 @@ static int handle_click(XPLMWindowID id, int x, int y, XPLMMouseStatus status, v
             return 1;
         }
         
-        if(window->conf.click && window->conf.click(window, click_win, scale, window->refcon)) return 1;    
-        else if(
+        if(window->conf.click && window->conf.click(window, WINDOW_MOUSE_DOWN, click_win, scale, window->refcon)) {
+            return 1;    
+        } else if(
             !XPLMWindowIsPoppedOut(window->ref)
             && !XPLMWindowIsInVR(window->ref)
             && click.x > left + RESIZE_MARGIN
@@ -288,6 +289,8 @@ static int handle_click(XPLMWindowID id, int x, int y, XPLMMouseStatus status, v
             window->last_click = click;
             XPLMSetWindowGeometry(window->ref, left + diff.x, top + diff.y, right + diff.x, bottom + diff.y);
             return 1;
+        } else if(window->conf.click) {
+            return window->conf.click(window, WINDOW_MOUSE_MOVE, click_win, scale, window->refcon);
         }
         break;
         
@@ -296,6 +299,9 @@ static int handle_click(XPLMWindowID id, int x, int y, XPLMMouseStatus status, v
             window->last_click = NULL_VECT2;
             return 1;
         } else {
+            if(window->conf.click) {
+                window->conf.click(window, WINDOW_MOUSE_UP, click_win, scale, window->refcon);
+            }
             window->last_click = NULL_VECT2;
             return 0;
         }
