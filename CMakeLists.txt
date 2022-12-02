@@ -14,7 +14,7 @@ target_include_directories(window PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 add_definitions(-DXPLM200=1 -DXPLM210=1 -DXPLM300=1 -DXPLM301=1 -DDEBUG=1)
 target_compile_options(window PUBLIC -Wall -Wextra -Werror)
 set_property(TARGET window PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(window PUBLIC ${LIBACFUTILS_LIBS})
+target_link_libraries(window PUBLIC acfutils)
 
 if(WIN32)
     add_definitions(-DAPL=0 -DIBM=1 -DLIN=0)
