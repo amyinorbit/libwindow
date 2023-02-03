@@ -475,7 +475,7 @@ void window_sys_fini(void) {
 void window_sys_move_to_vr(void) {
     if(!sys.is_init) return;
     for(window_t *win = avl_first(&sys.windows); win != NULL; win = AVL_NEXT(&sys.windows, win)) {
-        XPLMSetWindowPositioningMode(win->ref, xplm_WindowVR, -1);
+        XPLMSetWindowPositioningMode(win->ref, xplm_WindowVR, 0);
     }
 }
 
@@ -541,7 +541,7 @@ window_t *window_new(const window_conf_t *conf, void *refcon) {
     );
     XPLMSetWindowTitle(window->ref, conf->name);
     if(dr_geti(&sys.dr_vr_enabled) == 1) {
-        XPLMSetWindowPositioningMode(window->ref, xplm_WindowVR, -1);
+        XPLMSetWindowPositioningMode(window->ref, xplm_WindowVR, 0);
     }
     
     avl_add(&sys.windows, window);
@@ -617,7 +617,7 @@ void window_show(window_t *window) {
     ASSERT3P(window, !=, NULL);
     
     if(XPLMWindowIsPoppedOut(window->ref)) {
-        XPLMSetWindowPositioningMode(window->ref, xplm_WindowPositionFree, -1);
+        XPLMSetWindowPositioningMode(window->ref, xplm_WindowPositionFree, 0);
     }
     XPLMSetWindowIsVisible(window->ref, 1);
     if(window->conf.key) XPLMTakeKeyboardFocus(window->ref);
