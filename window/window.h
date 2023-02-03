@@ -56,6 +56,9 @@ void window_sys_save(void);
 void window_sys_restore(void);
 void window_sys_fini(void);
 
+void window_sys_move_to_vr(void);
+void window_sys_move_to_2d(void);
+
 window_t *window_new(const window_conf_t *conf, void *refcon);
 void window_destroy(window_t *window);
 

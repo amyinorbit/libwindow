@@ -55,6 +55,7 @@ static struct {
     char            *output_dir;
     avl_tree_t      windows;
     dr_t            dr_viewport;
+    dr_t            dr_vr_enabled;
     
     // XPLMWindowID    overlay;
     
@@ -103,7 +104,9 @@ static void restore_window(window_t *window, conf_t *conf) {
     if(!conf_get_b_v(conf, "%s/visible", &visible, window->conf.id)) return;
     conf_get_b_v(conf, "%s/popout", &is_popped_out, window->conf.id);
     
-    if(is_popped_out) {
+    if(dr_geti(&sys.dr_vr_enabled) == 1) {
+        XPLMSetWindowPositioningMode(window->ref, xplm_WindowVR, -1);
+    } else if(is_popped_out) {
     	XPLMSetWindowPositioningMode(window->ref, xplm_WindowPopOut, -1);
         XPLMSetWindowGeometryOS(window->ref, left, top, right, bottom);
     } else {
@@ -419,28 +422,11 @@ static int window_cmp(const void *wp1, const void *wp2) {
     return 0;
 }
 
-// static void overlay_draw(XPLMWindowID id, void *refcon) {
-//     UNUSED(refcon);
-//     logMsg("draw");
-//     int width, height;
-//     XPLMGetScreenSize(&width, &height);
-//     XPLMSetWindowGeometry(id, 0, height, width, 0);
-// }
-//
-// static int overlay_click(XPLMWindowID id, int x, int y, XPLMMouseStatus mouse, void *refcon) {
-//     UNUSED(id);
-//     UNUSED(x);
-//     UNUSED(y);
-//     UNUSED(refcon);
-//     logMsg("overlay click");
-//     if(mouse == xplm_MouseDown)
-//         XPLMTakeKeyboardFocus(NULL);
-//     return 0;
-// }
 
 void window_sys_init(const char *dir, const char *output_dir) {
     if(sys.is_init) return;
     fdr_find(&sys.dr_viewport, "sim/graphics/view/viewport");
+    fdr_find(&sys.dr_vr_enabled, "sim/graphics/VR/enabled");
     
     sys.close = load_image(dir, "close.png");
     sys.popout = load_image(dir, "popout.png");
@@ -455,21 +441,6 @@ void window_sys_init(const char *dir, const char *output_dir) {
     
     avl_create(&sys.windows, window_cmp, sizeof(window_t), offsetof(window_t, mgr_node));
     sys.output_dir = safe_strdup(output_dir);
-    
-    // Create a flight overlay to capture clicks outside of keyboard capture windows
-    // XPLMCreateWindow_t cfg;
-    //
-    // cfg.structSize = sizeof(cfg);
-    // cfg.left = 0;
-    // cfg.right = 0;
-    // cfg.top = 0;
-    // cfg.bottom = 0;
-    // cfg.decorateAsFloatingWindow = 0;
-    // cfg.layer = xplm_WindowLayerFlightOverlay;
-    // cfg.drawWindowFunc = overlay_draw;
-    // cfg.handleMouseClickFunc = overlay_click;
-    //
-    // sys.overlay = XPLMCreateWindowEx(&cfg);
     
     sys.is_init = true;
 }
@@ -500,6 +471,21 @@ void window_sys_fini(void) {
     sys.cursor = NULL;
     sys.output_dir = NULL;
 }
+
+void window_sys_move_to_vr(void) {
+    if(!sys.is_init) return;
+    for(window_t *win = avl_first(&sys.windows); win != NULL; win = AVL_NEXT(&sys.windows, win)) {
+        XPLMSetWindowPositioningMode(win->ref, xplm_WindowVR, -1);
+    }
+}
+
+void window_sys_move_to_2d(void) {
+    if(!sys.is_init) return;
+    for(window_t *win = avl_first(&sys.windows); win != NULL; win = AVL_NEXT(&sys.windows, win)) {
+        XPLMSetWindowPositioningMode(win->ref, xplm_WindowPositionFree, -1);
+    }
+}
+
 
 static void strreplace(char *str, const char *matches, char replace) {
     for(char *ptr = str; *ptr; ++ptr) {
@@ -554,6 +540,9 @@ window_t *window_new(const window_conf_t *conf, void *refcon) {
         conf->size.y * conf->max_scale
     );
     XPLMSetWindowTitle(window->ref, conf->name);
+    if(dr_geti(&sys.dr_vr_enabled) == 1) {
+        XPLMSetWindowPositioningMode(window->ref, xplm_WindowVR, -1);
+    }
     
     avl_add(&sys.windows, window);
     return window;
