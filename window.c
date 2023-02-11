@@ -197,7 +197,7 @@ static void handle_key(XPLMWindowID id, char key, XPLMKeyFlags flags, char vkey,
     if(lose) return;
     if(!(flags & xplm_DownFlag)) return;
     window_t *window = refcon;
-    if(window->conf.key) window->conf.key(window, (int)vkey, key, window->refcon);
+    if(window->conf.key) window->conf.key(window, (int)vkey, key, flags & xplm_ControlFlag, window->refcon);
 }
 
 static XPLMCursorStatus default_cursor(XPLMWindowID id, int x, int y, void *refcon) {

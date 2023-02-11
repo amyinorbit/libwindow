@@ -35,7 +35,7 @@ typedef enum {
 
 typedef void (*window_draw_f)(window_t *window, vect2_t pos, vect2_t size, void *refcon);
 typedef int (*window_click_f)(window_t *window, mouse_action_t act, vect2_t pos, vect2_t scale, void *refcon);
-typedef void (*window_key_f)(window_t *window, int key, char c, void *refcon);
+typedef void (*window_key_f)(window_t *window, int key, char c, bool ctrl, void *refcon);
 
 typedef struct {
     vect2_t         size;
