@@ -12,6 +12,12 @@ include_directories(window PROJECT
 
 target_include_directories(window PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_options(window PUBLIC -Wall -Wextra -Werror)
-set_property(TARGET window PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(window PUBLIC acfutils xplm xpwidgets)
+set_target_properties(window
+PROPERTIES
+    C_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN ON
+    POSITION_INDEPENDENT_CODE ON
+    LINK_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fno-stack-protector"
+)
 
