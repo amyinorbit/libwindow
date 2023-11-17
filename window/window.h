@@ -64,6 +64,7 @@ void window_destroy(window_t *window);
 
 XPLMCommandRef window_bind_cmd(window_t *window, const char *cmd);
 XPLMCommandRef window_bind_cmd2(window_t *window, const char *cmd, const char *desc);
+void window_bind_cmd3(window_t *window, XPLMCommandRef cmd);
 void window_unbind_cmd(window_t *window);
 
 void window_toggle(window_t *window);

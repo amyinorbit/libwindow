@@ -577,6 +577,13 @@ void window_unbind_cmd(window_t *window) {
     XPLMUnregisterCommandHandler(window->cmd, window_cmd_handler, 0, window);
 }
 
+void window_bind_cmd3(window_t *window, XPLMCommandRef cmd) {
+    ASSERT3P(window, !=, NULL);
+    window->cmd = cmd;
+    if(window->cmd)
+        XPLMRegisterCommandHandler(window->cmd, window_cmd_handler, 0, window);
+}
+
 XPLMCommandRef window_bind_cmd2(window_t *window, const char *cmd, const char *desc) {
     ASSERT3P(window, !=, NULL);
     window->cmd = XPLMCreateCommand(cmd, desc);
